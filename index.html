@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ludos Aeternum - Gaming Website</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/lucide@latest/dist/umd/lucide.min.css" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      body {
+        background-color: #111827; /* bg-gray-900 */
+        color: white;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      .game-card {
+        transition: transform 0.2s;
+        display: block !important; /* 强制显示游戏卡片 */
+        opacity: 1 !important; /* 强制显示游戏卡片 */
+      }
+      .game-card:hover {
+        transform: scale(1.05);
+      }
+      /* 游戏卡片的紧凑布局 */
+      .game-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        display: grid !important; /* 强制显示网格 */
+      }
+      .game-card h3 {
+        font-size: 1rem;
+        line-height: 1.4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .game-card p {
+        max-height: 3em;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+      .game-card .card-img {
+        height: 120px;
+      }
+      .card-body {
+        padding: 0.75rem;
+      }
+      .sidebar {
+        transition: all 0.3s ease-in-out;
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      .sidebar-trigger:hover + .sidebar,
+      .sidebar:hover {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      .sidebar.show {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      .sidebar-collapsed {
+        position: fixed;
+        left: 0;
+        top: 64px;
+        bottom: 0;
+        width: 60px;
+        background-color: #141e33; /* 深蓝色 */
+        z-index: 30;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem 0;
+        overflow-y: auto;
+      }
+      .collapsed-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        color: white;
+        border-radius: 8px;
+        transition: all 0.2s;
+      }
+      .collapsed-icon:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      .collapsed-icon.active {
+        background-color: #8b5cf6; /* 紫色 */
+      }
+    </style>
+  </head>
+  <body id="page-body">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-gray-800 z-50">
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="gamepad" class="w-7 h-7 text-purple-500"></i>
+              <span class="text-xl font-bold">Ludos Aeternum</span>
+            </div>
+          </div>
+          
+          <!-- Search Bar -->
+          <div class="flex-1 max-w-2xl mx-4">
+            <div class="relative">
+              <input
+                type="text"
+                placeholder="Search games..." 
+                class="w-full bg-gray-700 rounded-lg py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                id="search-input"
+              />
+              <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-400 w-5 h-5"></i>
+            </div>
+          </div>
+          
+          <nav class="hidden md:flex items-center space-x-4">
+            <a href="#" class="hover:text-purple-400">Popular</a>
+            <a href="#" class="hover:text-purple-400">New Games</a>
+            <a href="#" class="hover:text-purple-400">Categories</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sidebar Trigger Area - Vertical Icons Bar -->
+    <div class="sidebar-trigger sidebar-collapsed">
+      <!-- 所有游戏 -->
+      <div class="collapsed-icon active" data-category="all">
+        <i data-lucide="gamepad" class="w-6 h-6"></i>
+      </div>
+      <!-- 动作 -->
+      <div class="collapsed-icon" data-category="action">
+        <i data-lucide="sword" class="w-6 h-6"></i>
+      </div>
+      <!-- 物理 -->
+      <div class="collapsed-icon" data-category="physics">
+        <i data-lucide="atom" class="w-6 h-6"></i>
+      </div>
+      <!-- 多人 -->
+      <div class="collapsed-icon" data-category="multiplayer">
+        <i data-lucide="users" class="w-6 h-6"></i>
+      </div>
+      <!-- 射击 -->
+      <div class="collapsed-icon" data-category="shooter">
+        <i data-lucide="target" class="w-6 h-6"></i>
+      </div>
+      <!-- 解谜 -->
+      <div class="collapsed-icon" data-category="puzzle">
+        <i data-lucide="brain" class="w-6 h-6"></i>
+      </div>
+      <!-- 策略 -->
+      <div class="collapsed-icon" data-category="strategy">
+        <i data-lucide="chevron-right" class="w-6 h-6"></i>
+      </div>
+      <!-- 体育 -->
+      <div class="collapsed-icon" data-category="sports">
+        <i data-lucide="folder-root" class="w-6 h-6"></i>
+      </div>
+      <!-- 恐怖 -->
+      <div class="collapsed-icon" data-category="horror">
+        <i data-lucide="ghost" class="w-6 h-6"></i>
+      </div>
+      <!-- 动漫 -->
+      <div class="collapsed-icon" data-category="anime">
+        <i data-lucide="sparkles" class="w-6 h-6"></i>
+      </div>
+      <!-- 像素艺术 -->
+      <div class="collapsed-icon" data-category="pixel">
+        <i data-lucide="gamepad-2" class="w-6 h-6"></i>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar fixed left-0 top-16 h-full w-64 bg-gray-800 z-40">
+      <div class="p-4">
+        <h2 class="text-lg font-semibold mb-4">Categories</h2>
+        <div class="space-y-2">
+          <button
+            class="category-btn w-full flex items-center space-x-3 px-4 py-2 rounded-lg bg-purple-600"
+            data-category="all"
+          >
+            <i data-lucide="gamepad" class="w-5 h-5"></i>
+            <span>All Games</span>
+          </button>
+          <button
+            class="category-btn w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-700"
+            data-category="action"
+          >
+            <i data-lucide="sword" class="w-5 h-5"></i>
+            <span>Action</span>
+          </button>
+          <button
+            class="category-btn w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-700"
+            data-category="physics"
+          >
+            <i data-lucide="atom" class="w-5 h-5"></i>
+            <span>Physics</span>
+          </button>
+          <button
+            class="category-btn w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-700"
+            data-category="multiplayer"
+          >
+            <i data-lucide="users" class="w-5 h-5"></i>
+            <span>Multiplayer</span>
+          </button>
+          <button
+            class="category-btn w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-700"
+            data-category="shooter"
+          >
+            <i data-lucide="target" class="w-5 h-5"></i>
+            <span>Shooter</span>
+          </button>
+          <button
+            class="category-btn w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-700"
+            data-category="puzzle"
+          >
+            <i data-lucide="brain" class="w-5 h-5"></i>
+            <span>Puzzle</span>
+          </button>
+          <button
+            class="category-btn w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-700"
+            data-category="strategy"
+          >
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            <span>Strategy</span>
+          </button>
+          <button
+            class="category-btn w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-700"
+            data-category="sports"
+          >
+            <i data-lucide="folder-root" class="w-5 h-5"></i>
+            <span>Sports</span>
+          </button>
+          <button
+            class="category-btn w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-700"
+            data-category="horror"
+          >
+            <i data-lucide="ghost" class="w-5 h-5"></i>
+            <span>Horror</span>
+          </button>
+          <button
+            class="category-btn w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-700"
+            data-category="anime"
+          >
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+            <span>Anime</span>
+          </button>
+          <button
+            class="category-btn w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-700"
+            data-category="pixel"
+          >
+            <i data-lucide="gamepad-2" class="w-5 h-5"></i>
+            <span>Pixel Art</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="pt-20 pl-16 pr-4">
+      <div id="main-container" class="container mx-auto">
+        <!-- Featured Games -->
+        <section class="mb-8">
+          <h2 class="text-xl font-bold mb-4">Featured Games</h2>
+          <div class="game-grid grid gap-4">
+            <!-- Game cards will be dynamically inserted here -->
+          </div>
+        </section>
+
+        <!-- Popular Games -->
+        <section class="mb-8">
+          <h2 class="text-xl font-bold mb-4">Popular Games</h2>
+          <div class="game-grid grid gap-4">
+            <!-- Game cards will be dynamically inserted here -->
+          </div>
+        </section>
+
+        <!-- New Releases -->
+        <section class="mb-8">
+          <h2 class="text-xl font-bold mb-4">New Releases</h2>
+          <div class="game-grid grid gap-4">
+            <!-- Game cards will be dynamically inserted here -->
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      // 初始化Lucide图标
+      lucide.createIcons();
+      
+      // 游戏数据
+      const games = [
+        {
+          id: 28,
+          title: "Survival Island",
+          description: "Stranded on a remote island, gather resources, build shelter, and craft tools to survive in this challenging open-world adventure. Manage hunger, thirst, and health while exploring the island's secrets.",
+          image: "https://www.onlinegames.io/media/posts/970/responsive/Survival-Island-lg.jpg",
+          rating: 4.8,
+          plays: 18520,
+          categories: ["survival", "adventure", "action", "crafting", "exploration"],
+          gameUrl: "game/survival-island.html"
+        },
+        {
+          id: 27,
+          title: "Get On Top",
+          description: "Battle against a friend in this physics-based multiplayer game where you try to push your opponent down. Master the simple controls, develop strategies, and get on top to win!",
+          image: "https://www.onlinegames.io/media/posts/697/responsive/Get-on-Top-lg.jpg",
+          rating: 4.7,
+          plays: 15630,
+          categories: ["physics", "arcade", "casual", "multiplayer"],
+          gameUrl: "game/get-on-top.html"
+        },
+        {
+          id: 26,
+          title: "Stickman Destruction",
+          description: "Launch stickman characters into various obstacles, causing maximum destruction in this physics-based ragdoll game. Break bones, perform stunts, and unlock new vehicles for even more chaos!",
+          image: "https://www.onlinegames.io/media/posts/233/responsive/Stickman-Destruction-lg.jpg",
+          rating: 4.8,
+          plays: 18740,
+          categories: ["physics", "action", "arcade", "strategy"],
+          gameUrl: "game/stickman-destruction.html"
+        },
+        {
+          id: 25,
+          title: "Madalin Stunt Cars Pro",
+          description: "Perform incredible stunts with high-performance cars in this realistic 3D driving simulator. Master jumps, flips, and drifts across specially designed stunt playgrounds.",
+          image: "https://www.onlinegames.io/media/posts/401/responsive/Madalin-Stunt-Cars-Pro-Game-lg.jpg",
+          rating: 4.8,
+          plays: 21350,
+          categories: ["racing", "sports", "simulation"],
+          gameUrl: "game/madalin-stunt-cars-pro.html"
+        },
+        {
+          id: 24,
+          title: "Drift Hunters Pro",
+          description: "Master the art of drifting in this realistic racing simulator. Customize high-performance cars, conquer challenging tracks, and perfect your drift techniques to become the ultimate drift champion.",
+          image: "https://www.onlinegames.io/media/posts/397/responsive/Drift-Hunters-Pro-lg.jpg",
+          rating: 4.9,
+          plays: 19840,
+          categories: ["racing", "sports", "simulation"],
+          gameUrl: "game/drift-hunters-pro.html"
+        },
+        {
+          id: 23,
+          title: "Real Flight Simulator",
+          description: "Experience realistic flight simulation with detailed aircraft, dynamic weather conditions, and immersive environments. Master takeoff, navigation, and landing skills.",
+          image: "https://www.onlinegames.io/media/posts/342/responsive/Real-Flight-Simulator-2-lg.jpg",
+          rating: 4.8,
+          plays: 16750,
+          categories: ["simulation", "sports", "strategy"],
+          gameUrl: "game/real-flight-simulator.html"
+        },
+        {
+          id: 22,
+          title: "Stack Fire Ball",
+          description: "Test your timing and precision in this addictive physics-based stacking game. Stack flaming balls as high as possible without toppling your tower.",
+          image: "https://www.onlinegames.io/media/posts/184/responsive/Stack-Fire-Ball-Game-lg.jpg",
+          rating: 4.7,
+          plays: 14580,
+          categories: ["arcade", "casual", "puzzle", "physics", "skill"],
+          gameUrl: "game/stack-fire-ball.html"
+        },
+        {
+          id: 21,
+          title: "Squid Race Simulator",
+          description: "Race as a speedy squid in this exciting underwater competition. Navigate through challenging courses, avoid obstacles, and use power-ups to outpace your competitors.",
+          image: "https://www.onlinegames.io/media/posts/950/responsive/squid-race-simulator-lg.jpg",
+          rating: 4.8,
+          plays: 15620,
+          categories: ["racing", "arcade", "sports", "action"],
+          gameUrl: "game/squid-race-simulator.html"
+        },
+        {
+          id: 13,
+          title: "Monster Survivors",
+          description: "Survive endless waves of monsters, collect power-ups, and upgrade your character in this thrilling action game.",
+          image: "https://www.onlinegames.io/media/posts/942/responsive/Monster-survivors-lg.jpg",
+          rating: 4.9,
+          plays: 23840,
+          categories: ["action", "pixel", "strategy"],
+          gameUrl: "game/enhanced-monster-survivors.html"
+        },
+        {
+          id: 14,
+          title: "Nova Clicker",
+          description: "Build and expand your cosmic empire in this addictive idle clicker game. Click to generate stellar energy and unlock powerful upgrades.",
+          image: "https://game-game.com/gamesimg/256788.jpg",
+          rating: 4.8,
+          plays: 7520,
+          categories: ["strategy", "idle", "clicker"],
+          gameUrl: "game/nova-clicker.html"
+        },
+        {
+          id: 15,
+          title: "Fast Food Rush",
+          description: "Race against time as a food delivery driver navigating through busy streets. Avoid obstacles, collect power-ups, and deliver orders as quickly as possible.",
+          image: "https://www.onlinegames.io/media/posts/979/responsive/fast-food-rush-lg.jpg",
+          rating: 4.7,
+          plays: 5840,
+          categories: ["action", "arcade", "casual"],
+          gameUrl: "game/fast-food-rush.html"
+        },
+        {
+          id: 16,
+          title: "Drift King",
+          description: "Master the art of drifting in this thrilling racing game. Push high-performance cars to their limits as you slide around tight corners and compete to become the ultimate Drift King.",
+          image: "https://www.onlinegames.io/media/posts/729/responsive/Drift-King-lg.jpg",
+          rating: 4.9,
+          plays: 8720,
+          categories: ["racing", "sports", "action"],
+          gameUrl: "game/drift-king.html"
+        },
+        {
+          id: 17,
+          title: "Highway Traffic",
+          description: "Navigate through busy highways filled with traffic in this exciting arcade driving game. Test your reflexes as you weave through lanes, avoid obstacles, and collect power-ups to boost your score.",
+          image: "https://www.onlinegames.io/media/posts/32/responsive/Highway-Traffic-2-lg.jpg",
+          rating: 4.8,
+          plays: 6950,
+          categories: ["racing", "arcade", "casual"],
+          gameUrl: "game/highway-traffic.html"
+        },
+        {
+          id: 18,
+          title: "Masked Special Forces",
+          description: "Join an elite tactical unit and engage in intense first-person shooter combat. Complete high-stakes missions, eliminate hostile targets, and secure strategic objectives in this action-packed FPS game.",
+          image: "https://www.onlinegames.io/media/posts/310/responsive/Masked-Special-Forces-FPS-lg.jpg",
+          rating: 4.9,
+          plays: 12680,
+          categories: ["action", "shooter", "strategy"],
+          gameUrl: "game/masked-special-forces.html"
+        },
+        {
+          id: 19,
+          title: "WarStrike",
+          description: "Engage in high-intensity tactical combat in this action-packed first-person shooter. Eliminate enemy forces, complete objectives, and master various weapons in challenging battlefield scenarios.",
+          image: "https://www.onlinegames.io/media/posts/870/responsive/WarStrike-Online-lg.jpg",
+          rating: 4.8,
+          plays: 9850,
+          categories: ["action", "shooter", "strategy"],
+          gameUrl: "game/warstrike.html"
+        },
+        {
+          id: 20,
+          title: "Super Car Driving",
+          description: "Experience high-speed thrills as you navigate challenging tracks, master perfect drifts, and push your driving skills to the limit with the world's most powerful supercars.",
+          image: "https://www.onlinegames.io/media/posts/854/responsive/supercardriving-2-lg.jpg",
+          rating: 4.8,
+          plays: 18652,
+          categories: ["racing", "sports", "simulation"],
+          gameUrl: "game/super-car-driving.html"
+        }
+      ];
+      
+      // 当前选中的类别
+      let currentCategory = "all";
+      // 当前搜索关键词
+      let currentSearchTerm = "";
+      
+      // 创建游戏卡片元素的函数
+      function createGameCard(game) {
+        const card = document.createElement("div");
+        card.className = "game-card bg-gray-800 rounded-lg overflow-hidden shadow-md";
+        card.dataset.gameId = game.id;
+        
+        // 为卡片添加点击效果 - 显示游戏详情
+        card.addEventListener("click", function(e) {
+          // 如果点击的是按钮，不触发卡片点击事件
+          if (e.target.tagName === "BUTTON") return;
+          showGameDetails(game);
+        });
+        
+        card.innerHTML = `
+          <img src="${game.image}" alt="${game.title}" class="card-img w-full object-cover" />
+          <div class="card-body">
+            <h3 class="font-semibold mb-1">${game.title}</h3>
+            <p class="text-gray-400 text-xs mb-2">${game.description}</p>
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center">
+                <span class="text-yellow-400">★</span>
+                <span class="ml-1">${game.rating}</span>
+              </div>
+              <span class="text-gray-400">${game.plays.toLocaleString()} plays</span>
+            </div>
+            <button class="play-btn mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-1.5 px-3 rounded transition-colors duration-200">Play Now</button>
+          </div>
+        `;
+        
+        return card;
+      }
+      
+      // 更新游戏展示区域
+      function updateGameDisplay() {
+        // 增加调试信息
+        console.log("Updating game display");
+        
+        // 清除搜索结果区域
+        const searchResultsSection = document.getElementById("search-results");
+        if (searchResultsSection) {
+          searchResultsSection.remove();
+        }
+        
+        // 获取要展示的游戏列表
+        let filteredGames = games;
+        console.log("All game data:", filteredGames);
+        
+        // 应用类别过滤
+        if (currentCategory !== "all") {
+          filteredGames = filteredGames.filter(game => 
+            game.categories.includes(currentCategory)
+          );
+        }
+        
+        // 应用搜索过滤
+        if (currentSearchTerm) {
+          const searchLower = currentSearchTerm.toLowerCase();
+          filteredGames = filteredGames.filter(game => 
+            game.title.toLowerCase().includes(searchLower) || 
+            game.description.toLowerCase().includes(searchLower)
+          );
+          
+          // 显示搜索结果
+          const mainContainer = document.getElementById("main-container");
+          const searchSection = document.createElement("section");
+          searchSection.id = "search-results";
+          searchSection.className = "mb-8";
+          
+          const searchTitle = document.createElement("h2");
+          searchTitle.className = "text-xl font-bold mb-4";
+          searchTitle.textContent = `Search Results for "${currentSearchTerm}"`;
+          searchSection.appendChild(searchTitle);
+          
+          const searchGrid = document.createElement("div");
+          searchGrid.className = "game-grid grid gap-4";
+          
+          if (filteredGames.length > 0) {
+            filteredGames.forEach(game => {
+              searchGrid.appendChild(createGameCard(game));
+            });
+          } else {
+            const noResults = document.createElement("p");
+            noResults.className = "text-gray-400";
+            noResults.textContent = "No games found matching your search.";
+            searchGrid.appendChild(noResults);
+          }
+          
+          searchSection.appendChild(searchGrid);
+          mainContainer.prepend(searchSection);
+          
+          // 隐藏其他区域
+          document.querySelectorAll('#main-container > section:not(#search-results)').forEach(section => {
+            section.style.display = "none";
+          });
+          
+          return;
+        } else {
+          // 显示所有区域
+          document.querySelectorAll('#main-container > section').forEach(section => {
+            section.style.display = "block";
+          });
+        }
+        
+        console.log("Updating game sections");
+        // 更新各个游戏区块
+        // 特色游戏区域
+        updateSectionGames("featured", filteredGames.filter(game => game.rating >= 4.7).slice(0, 5));
+        
+        // 热门游戏区域
+        updateSectionGames("popular", filteredGames.sort((a, b) => b.plays - a.plays).slice(0, 3));
+        
+        // 新发布区域
+        updateSectionGames("new", filteredGames.slice(-6));
+      }
+      
+      // 更新特定区域的游戏
+      function updateSectionGames(sectionType, gamesToShow) {
+        // 根据区域类型确定要更新的元素
+        let sectionElement;
+        console.log(`Updating ${sectionType} section, games count:`, gamesToShow.length);
+        
+        if (sectionType === "featured") {
+          sectionElement = document.querySelector('section:nth-child(1) .game-grid');
+        } else if (sectionType === "popular") {
+          sectionElement = document.querySelector('section:nth-child(2) .game-grid');
+        } else if (sectionType === "new") {
+          sectionElement = document.querySelector('section:nth-child(3) .game-grid');
+        }
+        
+        if (sectionElement) {
+          console.log(`Found ${sectionType} section element`);
+          // 清空当前内容
+          sectionElement.innerHTML = '';
+          
+          // 添加游戏卡片
+          if (gamesToShow.length > 0) {
+            gamesToShow.forEach(game => {
+              console.log(`Adding game card: ${game.title}`);
+              sectionElement.appendChild(createGameCard(game));
+            });
+          } else {
+            const noGames = document.createElement("p");
+            noGames.className = "text-gray-400 col-span-full";
+            noGames.textContent = "No games found in this category.";
+            sectionElement.appendChild(noGames);
+          }
+        } else {
+          console.log(`Section element for ${sectionType} not found`);
+        }
+      }
+      
+      // 显示游戏详情的函数
+      function showGameDetails(game) {
+        // 创建模态窗口
+        const modal = document.createElement("div");
+        modal.className = "fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-75";
+        
+        modal.innerHTML = `
+          <div class="bg-gray-800 rounded-lg max-w-2xl w-full mx-4 overflow-hidden">
+            <div class="relative">
+              <img src="${game.image}" alt="${game.title}" class="w-full h-64 object-cover">
+              <button id="close-modal" class="absolute top-2 right-2 bg-black bg-opacity-50 rounded-full p-2 text-white hover:bg-opacity-70">
+                <i data-lucide="x" class="w-6 h-6"></i>
+              </button>
+            </div>
+            <div class="p-6">
+              <div class="flex justify-between items-start mb-4">
+                <h3 class="text-2xl font-bold">${game.title}</h3>
+                <div class="flex items-center bg-yellow-500 rounded-full px-2 py-1">
+                  <span class="text-black font-bold">${game.rating}</span>
+                  <span class="text-black ml-1">★</span>
+                </div>
+              </div>
+              
+              <p class="text-gray-300 mb-4">${game.description}</p>
+              
+              <div class="bg-gray-700 p-4 rounded-lg mb-4">
+                <div class="flex justify-between mb-2">
+                  <span class="text-gray-400">Total Plays</span>
+                  <span>${game.plays.toLocaleString()}</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                  <span class="text-gray-400">Categories</span>
+                  <div class="flex flex-wrap gap-1">
+                    ${game.categories.map(cat => `
+                      <span class="bg-purple-600 text-xs rounded px-2 py-1">${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+                    `).join('')}
+                  </div>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-400">Release Date</span>
+                  <span>2023</span>
+                </div>
+              </div>
+              
+              <div class="flex space-x-3">
+                <button class="play-game-btn flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                  Play Now
+                </button>
+                <button class="add-favorite-btn flex items-center justify-center bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                  <i data-lucide="heart" class="w-5 h-5"></i>
+                </button>
+                <button class="share-btn flex items-center justify-center bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                  <i data-lucide="share" class="w-5 h-5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        lucide.createIcons(); // 重新初始化图标
+        
+        // 添加事件监听器
+        modal.querySelector("#close-modal").addEventListener("click", function() {
+          modal.remove();
+        });
+        
+        modal.querySelector(".play-game-btn").addEventListener("click", function() {
+          launchGame(game);
+          modal.remove();
+        });
+        
+        modal.querySelector(".add-favorite-btn").addEventListener("click", function() {
+          this.classList.toggle("bg-red-600");
+          this.classList.toggle("bg-gray-700");
+          this.classList.toggle("hover:bg-red-700");
+          this.classList.toggle("hover:bg-gray-600");
+          
+          // 显示消息提示
+          showToast(`${game.title} ${this.classList.contains("bg-red-600") ? "added to" : "removed from"} favorites`);
+        });
+        
+        modal.querySelector(".share-btn").addEventListener("click", function() {
+          showShareOptions(game);
+        });
+        
+        // 点击模态窗口背景时关闭
+        modal.addEventListener("click", function(e) {
+          if (e.target === modal) {
+            modal.remove();
+          }
+        });
+      }
+      
+      // 启动游戏函数
+      function launchGame(game) {
+        // 如果游戏有专用URL，直接跳转
+        if (game.gameUrl) {
+          window.location.href = game.gameUrl;
+          return;
+        }
+        
+        // 显示游戏加载/启动界面
+        const gameContainer = document.createElement("div");
+        gameContainer.className = "fixed inset-0 z-50 bg-black flex flex-col items-center justify-center";
+        
+        gameContainer.innerHTML = `
+          <div class="w-full max-w-6xl h-full max-h-[80vh] relative bg-gray-900 rounded-lg overflow-hidden">
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-center">
+                <h2 class="text-2xl font-bold text-white mb-2">${game.title}</h2>
+                <p class="text-gray-400 mb-4">Loading game...</p>
+                <div class="w-64 h-2 bg-gray-700 rounded-full overflow-hidden mx-auto">
+                  <div class="loading-bar h-full bg-purple-600 w-0"></div>
+                </div>
+              </div>
+            </div>
+            
+            <button id="exit-game" class="absolute top-4 right-4 bg-black bg-opacity-50 rounded-full p-2 text-white hover:bg-opacity-70 z-10">
+              <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+          </div>
+        `;
+        
+        document.body.appendChild(gameContainer);
+        lucide.createIcons();
+        
+        // 模拟加载进度
+        const loadingBar = gameContainer.querySelector(".loading-bar");
+        let progress = 0;
+        
+        const loadingInterval = setInterval(() => {
+          progress += Math.random() * 10;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(loadingInterval);
+            
+            // 加载完成，显示游戏界面
+            setTimeout(() => {
+              gameContainer.querySelector(".absolute").innerHTML = `
+                <div class="w-full h-full flex flex-col items-center justify-center">
+                  <h2 class="text-3xl font-bold text-white mb-4">${game.title}</h2>
+                  <p class="text-xl text-gray-300 mb-8">Game Started!</p>
+                  <p class="text-gray-400 text-center max-w-md mb-8">This is a demo of the game interface. In a real implementation, the actual game would be loaded here.</p>
+                  <div class="flex space-x-4">
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded">Play</button>
+                    <button class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded">Options</button>
+                  </div>
+                </div>
+              `;
+            }, 500);
+          }
+          loadingBar.style.width = `${progress}%`;
+        }, 200);
+        
+        // 退出游戏
+        gameContainer.querySelector("#exit-game").addEventListener("click", function() {
+          clearInterval(loadingInterval);
+          gameContainer.remove();
+        });
+      }
+      
+      // 显示分享选项
+      function showShareOptions(game) {
+        const shareModal = document.createElement("div");
+        shareModal.className = "fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-75";
+        
+        shareModal.innerHTML = `
+          <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold">Share ${game.title}</h3>
+              <button id="close-share" class="text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-4 mb-6">
+              <button class="share-option flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center mb-2">
+                  <i data-lucide="facebook" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs">Facebook</span>
+              </button>
+              
+              <button class="share-option flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full bg-sky-500 flex items-center justify-center mb-2">
+                  <i data-lucide="twitter" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs">Twitter</span>
+              </button>
+              
+              <button class="share-option flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center mb-2">
+                  <i data-lucide="message-circle" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs">WhatsApp</span>
+              </button>
+              
+              <button class="share-option flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center mb-2">
+                  <i data-lucide="link" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs">Copy Link</span>
+              </button>
+            </div>
+            
+            <div class="bg-gray-700 p-3 rounded flex items-center">
+              <input type="text" readonly value="https://ludosaeternum.com/game/${game.id}" class="bg-transparent flex-1 text-sm outline-none" />
+              <button id="copy-link" class="ml-2 text-purple-400 hover:text-purple-300">
+                <i data-lucide="copy" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(shareModal);
+        lucide.createIcons();
+        
+        // 添加事件监听器
+        shareModal.querySelector("#close-share").addEventListener("click", function() {
+          shareModal.remove();
+        });
+        
+        shareModal.querySelectorAll(".share-option").forEach(option => {
+          option.addEventListener("click", function() {
+            showToast(`Shared via ${this.querySelector('span').textContent}`);
+            shareModal.remove();
+          });
+        });
+        
+        shareModal.querySelector("#copy-link").addEventListener("click", function() {
+          const input = shareModal.querySelector("input");
+          input.select();
+          document.execCommand("copy");
+          showToast("Link copied to clipboard");
+        });
+        
+        // 点击模态窗口背景时关闭
+        shareModal.addEventListener("click", function(e) {
+          if (e.target === shareModal) {
+            shareModal.remove();
+          }
+        });
+      }
+      
+      // 显示提示消息
+      function showToast(message) {
+        const toast = document.createElement("div");
+        toast.className = "fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300 opacity-0 z-50";
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // 淡入
+        setTimeout(() => {
+          toast.classList.remove("opacity-0");
+          toast.classList.add("opacity-100");
+        }, 10);
+        
+        // 淡出并移除
+        setTimeout(() => {
+          toast.classList.remove("opacity-100");
+          toast.classList.add("opacity-0");
+          
+          setTimeout(() => {
+            toast.remove();
+          }, 300);
+        }, 3000);
+      }
+      
+      // 分类按钮点击事件和侧边栏图标点击事件的联动
+      const categoryButtons = document.querySelectorAll('.category-btn');
+      const collapsedIcons = document.querySelectorAll('.collapsed-icon');
+      
+      // 切换分类的函数
+      function switchCategory(category) {
+        currentCategory = category;
+        
+        // 更新展开侧边栏的按钮状态
+        categoryButtons.forEach(btn => {
+          if (btn.getAttribute('data-category') === category) {
+            btn.classList.add('bg-purple-600');
+            btn.classList.remove('hover:bg-gray-700');
+          } else {
+            btn.classList.remove('bg-purple-600');
+            btn.classList.add('hover:bg-gray-700');
+          }
+        });
+        
+        // 更新垂直图标栏的选中状态
+        collapsedIcons.forEach(icon => {
+          if (icon.getAttribute('data-category') === category) {
+            icon.classList.add('active');
+          } else {
+            icon.classList.remove('active');
+          }
+        });
+        
+        console.log(`Selected category: ${category}`);
+        
+        // 更新游戏显示
+        updateGameDisplay();
+        
+        // 清空搜索框
+        document.getElementById('search-input').value = '';
+        currentSearchTerm = '';
+        
+        // 显示提示消息
+        const categoryName = category === 'all' ? 'All Games' : 
+          category.charAt(0).toUpperCase() + category.slice(1);
+        showToast(`Now showing: ${categoryName}`);
+      }
+      
+      // 侧边栏按钮点击事件
+      categoryButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const category = button.getAttribute('data-category');
+          switchCategory(category);
+        });
+      });
+      
+      // 垂直图标点击事件
+      collapsedIcons.forEach(icon => {
+        icon.addEventListener('click', () => {
+          const category = icon.getAttribute('data-category');
+          switchCategory(category);
+        });
+      });
+      
+      // 搜索功能
+      const searchInput = document.getElementById('search-input');
+      
+      searchInput.addEventListener('input', (e) => {
+        currentSearchTerm = e.target.value.trim();
+        console.log(`Search term: ${currentSearchTerm}`);
+        
+        if (currentSearchTerm.length >= 2) {
+          updateGameDisplay();
+        } else if (currentSearchTerm.length === 0 && document.getElementById('search-results')) {
+          currentSearchTerm = '';
+          updateGameDisplay();
+        }
+      });
+      
+      // 导航栏链接事件
+      const navLinks = document.querySelectorAll('nav a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const linkText = this.textContent.toLowerCase();
+          if (linkText === 'popular') {
+            // 滚动到热门游戏部分
+            document.querySelector('section:nth-child(2)').scrollIntoView({ behavior: 'smooth' });
+          } else if (linkText === 'new games') {
+            // 滚动到新游戏部分
+            document.querySelector('section:nth-child(3)').scrollIntoView({ behavior: 'smooth' });
+          } else if (linkText === 'categories') {
+            // 打开侧边栏
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+          }
+        });
+      });
+      
+      // 监听Play Now按钮点击
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('play-btn')) {
+          const gameCard = e.target.closest('.game-card');
+          const gameId = parseInt(gameCard.dataset.gameId);
+          const game = games.find(g => g.id === gameId);
+          
+          if (game && game.gameUrl) {
+            window.location.href = game.gameUrl;
+          } else if (game) {
+            launchGame(game);
+          }
+          
+          e.stopPropagation(); // 防止触发卡片点击事件
+        }
+      });
+      
+      // 添加点击外部区域关闭侧边栏的功能
+      document.addEventListener('click', function(e) {
+        const sidebar = document.getElementById('sidebar');
+        const categoriesLink = document.querySelector('nav a:nth-child(3)');
+        
+        // 如果点击的不是侧边栏内部元素，也不是Categories链接，则关闭侧边栏
+        if (sidebar.classList.contains('show') && 
+            !sidebar.contains(e.target) && 
+            e.target !== categoriesLink && 
+            !categoriesLink.contains(e.target)) {
+          sidebar.classList.remove('show');
+        }
+      });
+      
+      // 添加关闭侧边栏的按钮
+      const sidebar = document.getElementById('sidebar');
+      const closeButton = document.createElement('button');
+      closeButton.className = 'absolute top-4 right-4 text-gray-400 hover:text-white';
+      closeButton.innerHTML = '<i data-lucide="x" class="w-5 h-5"></i>';
+      closeButton.addEventListener('click', function() {
+        sidebar.classList.remove('show');
+      });
+      sidebar.querySelector('.p-4').prepend(closeButton);
+      
+      // 分类按钮点击事件添加关闭侧边栏功能
+      categoryButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const category = button.getAttribute('data-category');
+          switchCategory(category);
+          // 点击分类按钮后关闭侧边栏
+          sidebar.classList.remove('show');
+        });
+      });
+      
+      // 重新初始化Lucide图标以显示关闭按钮
+      lucide.createIcons();
+      
+      // 页面加载完成后的处理函数
+      window.onload = function() {
+        console.log("Page fully loaded");
+        
+        // 检查游戏数据
+        console.log("Game data check: Total " + games.length + " games");
+        
+        // 强制更新所有游戏显示
+        updateGameDisplay();
+        
+        // 初始化图标
+        lucide.createIcons();
+      };
+      
+      // 页面DOM加载完成后初始化游戏显示
+      document.addEventListener('DOMContentLoaded', function() {
+        // 确保所有游戏区域都正确显示
+        updateGameDisplay();
+        // 初始化Lucide图标
+        lucide.createIcons();
+      });
+      
+      // 立即更新一次游戏显示
+      updateGameDisplay();
+    </script>
+  </body>
+</html>
