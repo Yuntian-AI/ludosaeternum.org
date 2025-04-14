@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Survival Island - Ludos Aeternum</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://unpkg.com/lucide@latest/dist/umd/lucide.min.css" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { 
+      margin: 0; 
+      padding: 0; 
+      background-color: #111827; 
+      color: white;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .game-controls button { 
+      transition: all 0.2s; 
+    }
+    .game-controls button:hover { 
+      background-color: #4f46e5; 
+      transform: scale(1.05); 
+    }
+    /* Mobile optimization */
+    @media (max-width: 640px) {
+      .game-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      .game-title {
+        order: 1;
+        width: 100%;
+        text-align: center;
+      }
+      .back-link {
+        order: 0;
+      }
+      .game-controls {
+        order: 2;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    /* 自定义动画效果 */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .animate-pulse-slow {
+      animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    /* 玩法提示卡片样式 */
+    .tip-card {
+      transition: all 0.3s ease;
+    }
+    .tip-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+    /* 游戏信息模态窗口滚动条样式 */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #1f2937;
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #4f46e5;
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #6366f1;
+    }
+    
+    /* 新增优化样式 */
+    .game-container {
+      position: relative;
+      height: 75vh;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    
+    .game-info-section {
+      background: linear-gradient(to bottom, #1e293b, #111827);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      margin-top: -1rem;
+      position: relative;
+      z-index: 5;
+    }
+    
+    .game-info-header {
+      background: linear-gradient(to right, #4f46e5, #7e22ce);
+      border-radius: 12px 12px 0 0;
+      padding: 1rem 1.5rem;
+    }
+    
+    .badge {
+      transition: all 0.2s;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .badge:hover {
+      transform: scale(1.05);
+    }
+    
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.4), transparent);
+      margin: 2rem 0;
+    }
+    
+    .game-overview-image {
+      border: 3px solid #4f46e5;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s;
+    }
+    
+    .game-overview-image:hover {
+      transform: scale(1.02);
+      border-color: #6366f1;
+    }
+    
+    .enhanced-tip-card {
+      border-left: 3px solid;
+      transition: all 0.3s;
+    }
+    
+    .movement-card { border-color: #3b82f6; }
+    .combat-card { border-color: #ef4444; }
+    .items-card { border-color: #10b981; }
+    .menu-card { border-color: #f59e0b; }
+    .beginner-card { border-color: #f59e0b; }
+    .advanced-card { border-color: #7c3aed; }
+    
+    .crafting-card { border-color: #f59e0b; }
+    .survival-card { border-color: #10b981; }
+    .explore-card { border-color: #3b82f6; }
+    .building-card { border-color: #7c3aed; }
+    
+    .enhanced-tip-card:hover {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+      transform: translateY(-5px);
+    }
+    
+    /* 顶部导航栏优化 */
+    .enhanced-header {
+      background: linear-gradient(to right, #1e293b, #0f172a);
+      border-bottom: 1px solid #374151;
+    }
+    
+    /* 响应式设计优化 */
+    @media (max-width: 768px) {
+      .game-container {
+        height: 60vh;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white m-0 p-0">
+  <div class="flex flex-col">
+    <div class="bg-gray-800 p-4 flex justify-between items-center game-header enhanced-header">
+      <a href="../index.html" class="text-white hover:text-purple-400 flex items-center gap-2 back-link">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span>Back to Games</span>
+      </a>
+      <h1 class="text-xl font-bold text-yellow-500 game-title">Survival Island</h1>
+      <div class="game-controls flex items-center gap-4">
+        <button id="fullscreen-btn" class="p-2 bg-gray-700 hover:bg-indigo-600 rounded-lg" title="Fullscreen">
+          <i data-lucide="maximize" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <div class="flex-1 relative">
+      <div class="relative h-[70vh] game-container">
+        <iframe id="game-frame" src="https://cloud.onlinegames.io/games/2024/unity2/survival-island/index-og.html" class="w-full h-full border-0" allow="autoplay; fullscreen; microphone" allowfullscreen sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation allow-pointer-lock"></iframe>
+        
+        <!-- Loading overlay -->
+        <div id="loading-overlay" class="absolute inset-0 bg-gray-900 bg-opacity-90 flex flex-col items-center justify-center z-10">
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-yellow-500 mb-2">Survival Island</h2>
+            <p class="text-gray-300 text-lg">Prepare for adventure...</p>
+          </div>
+          <div class="w-64 h-2 bg-gray-700 rounded-full overflow-hidden mb-4">
+            <div id="loading-bar" class="h-full bg-purple-600 w-0 transition-all duration-300"></div>
+          </div>
+          <p id="loading-text" class="text-gray-400">Loading game assets...</p>
+        </div>
+        
+        <!-- Guide restore button in fixed position -->
+        <button id="restore-guide-btn" class="fixed right-4 top-24 bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full shadow-lg z-40 hidden">
+          <i data-lucide="book-open" class="w-6 h-6"></i>
+        </button>
+        
+        <!-- Game guide in fixed position -->
+        <div id="quick-guide" class="fixed right-4 top-24 bg-gray-800 bg-opacity-90 p-4 rounded-lg shadow-lg z-30 w-64 transform transition-transform duration-300 translate-x-80">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-lg font-bold text-yellow-500">Game Guide</h3>
+            <div class="flex gap-2">
+              <button id="close-guide" class="text-white hover:text-purple-400" title="Close Guide">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+          <div class="space-y-3 text-sm">
+            <div class="bg-gray-700 p-2 rounded">
+              <h4 class="font-medium text-white flex items-center gap-1 mb-1">
+                <i data-lucide="gamepad" class="w-4 h-4 text-blue-400"></i>
+                Controls
+              </h4>
+              <ul class="text-gray-300 list-disc list-inside text-xs space-y-1">
+                <li>WASD or arrow keys to move</li>
+                <li>Mouse to look around</li>
+                <li>Space to jump</li>
+              </ul>
+            </div>
+            <div class="bg-gray-700 p-2 rounded">
+              <h4 class="font-medium text-white flex items-center gap-1 mb-1">
+                <i data-lucide="zap" class="w-4 h-4 text-yellow-400"></i>
+                Survival Tips
+              </h4>
+              <ul class="text-gray-300 list-disc list-inside text-xs space-y-1">
+                <li>Gather resources to craft items</li>
+                <li>Build shelter before nightfall</li>
+                <li>Find food and water to survive</li>
+              </ul>
+            </div>
+            <div class="bg-gray-700 p-2 rounded">
+              <h4 class="font-medium text-white flex items-center gap-1 mb-1">
+                <i data-lucide="lightbulb" class="w-4 h-4 text-green-400"></i>
+                Strategy Tips
+              </h4>
+              <ul class="text-gray-300 list-disc list-inside text-xs space-y-1">
+                <li>Explore the island to find better resources</li>
+                <li>Create weapons to defend yourself</li>
+                <li>Manage your hunger and thirst meters</li>
+              </ul>
+            </div>
+            <button id="more-guide" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs py-1.5 rounded">
+              View Complete Game Guide
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Game detailed introduction (displayed directly below the game) -->
+    <div class="bg-gray-800 p-6 border-t border-gray-700 game-info-section">
+      <div class="max-w-7xl mx-auto px-4">
+        <!-- Game title and rating -->
+        <div class="flex flex-wrap justify-between items-center mb-6 game-info-header">
+          <h2 class="text-2xl font-bold text-yellow-50">Survival Island - Game Overview</h2>
+          <div class="flex items-center gap-3 mt-2 sm:mt-0">
+            <span class="bg-yellow-500 text-black text-sm font-bold px-3 py-1 rounded-full badge">4.8 ★</span>
+            <span class="bg-purple-700 text-white text-sm px-3 py-1 rounded-full badge">18,520 Plays</span>
+            <span class="bg-blue-600 text-white text-sm px-3 py-1 rounded-full badge">Featured Game</span>
+          </div>
+        </div>
+        
+        <!-- Game preview and overview -->
+        <div class="mb-8">
+          <div>
+            <h3 class="text-xl font-semibold text-purple-400 mb-4">Game Overview</h3>
+            <p class="text-gray-300 mb-4 leading-relaxed">
+              Survival Island is an immersive survival adventure game where you're stranded on a remote island with nothing but your wits to rely on.
+              Your goal is to explore the island, gather resources, craft tools, build shelter, and ultimately find a way to escape or thrive in this challenging environment.
+            </p>
+            <p class="text-gray-300 mb-5 leading-relaxed">
+              As you explore the island, you'll discover new areas with valuable resources, face dangerous wildlife, and uncover secrets that might help you survive.
+              Manage your hunger, thirst, and health while building increasingly complex structures and tools to improve your chances of survival.
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <span class="bg-gradient-to-r from-indigo-800 to-indigo-700 text-white text-xs px-3 py-1.5 rounded-full badge">Adventure</span>
+              <span class="bg-gradient-to-r from-green-800 to-green-700 text-white text-xs px-3 py-1.5 rounded-full badge">Survival</span>
+              <span class="bg-gradient-to-r from-blue-800 to-blue-700 text-white text-xs px-3 py-1.5 rounded-full badge">Crafting</span>
+              <span class="bg-gradient-to-r from-red-800 to-red-700 text-white text-xs px-3 py-1.5 rounded-full badge">Action</span>
+              <span class="bg-gradient-to-r from-purple-800 to-purple-700 text-white text-xs px-3 py-1.5 rounded-full badge">Exploration</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section-divider"></div>
+        
+        <!-- Controls -->
+        <div class="mb-10">
+          <h3 class="text-xl font-semibold text-purple-400 mb-5 inline-flex items-center">
+            <i data-lucide="gamepad-2" class="w-5 h-5 mr-2"></i>
+            Controls
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-gray-800 p-4 rounded-lg enhanced-tip-card movement-card">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="p-2 bg-blue-900 rounded-full">
+                  <i data-lucide="move" class="w-6 h-6 text-blue-400"></i>
+                </div>
+                <h4 class="font-medium text-white">Movement</h4>
+              </div>
+              <ul class="list-disc list-inside text-gray-300 text-sm space-y-1.5">
+                <li>WASD or arrow keys for movement</li>
+                <li>Space to jump</li>
+                <li>Shift to sprint (uses stamina)</li>
+              </ul>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg enhanced-tip-card combat-card">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="p-2 bg-red-900 rounded-full">
+                  <i data-lucide="swords" class="w-6 h-6 text-red-400"></i>
+                </div>
+                <h4 class="font-medium text-white">Actions</h4>
+              </div>
+              <ul class="list-disc list-inside text-gray-300 text-sm space-y-1.5">
+                <li>Left click to interact/attack</li>
+                <li>Right click to use/place items</li>
+                <li>E to open inventory</li>
+              </ul>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg enhanced-tip-card items-card">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="p-2 bg-green-900 rounded-full">
+                  <i data-lucide="gem" class="w-6 h-6 text-green-400"></i>
+                </div>
+                <h4 class="font-medium text-white">Resources</h4>
+              </div>
+              <ul class="list-disc list-inside text-gray-300 text-sm space-y-1.5">
+                <li>F to gather resources</li>
+                <li>Number keys (1-9) to select items</li>
+                <li>Q to drop current item</li>
+              </ul>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg enhanced-tip-card menu-card">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="p-2 bg-yellow-900 rounded-full">
+                  <i data-lucide="pause" class="w-6 h-6 text-yellow-400"></i>
+                </div>
+                <h4 class="font-medium text-white">Game Menu</h4>
+              </div>
+              <ul class="list-disc list-inside text-gray-300 text-sm space-y-1.5">
+                <li>ESC key to pause the game</li>
+                <li>Tab to view crafting menu</li>
+                <li>C to view character stats</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section-divider"></div>
+        
+        <!-- Game tips -->
+        <div class="mb-10">
+          <h3 class="text-xl font-semibold text-purple-400 mb-5 inline-flex items-center">
+            <i data-lucide="lightbulb" class="w-5 h-5 mr-2"></i>
+            Game Tips
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-800 p-5 rounded-lg enhanced-tip-card beginner-card">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="p-2 bg-yellow-900 rounded-full">
+                  <i data-lucide="lightbulb" class="w-6 h-6 text-yellow-400"></i>
+                </div>
+                <h4 class="font-medium text-white">Beginner Tips</h4>
+              </div>
+              <ul class="list-disc list-inside text-gray-300 text-sm space-y-2">
+                <li>Start by gathering basic materials (wood, stone, leaves)</li>
+                <li>Craft a simple shelter before nightfall</li>
+                <li>Find a source of fresh water as soon as possible</li>
+                <li>Create basic tools to gather resources more efficiently</li>
+                <li>Look for fruit trees for easy food sources</li>
+              </ul>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-lg enhanced-tip-card advanced-card">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="p-2 bg-purple-900 rounded-full">
+                  <i data-lucide="crown" class="w-6 h-6 text-purple-400"></i>
+                </div>
+                <h4 class="font-medium text-white">Advanced Strategies</h4>
+              </div>
+              <ul class="list-disc list-inside text-gray-300 text-sm space-y-2">
+                <li>Create a sustainable food source through farming</li>
+                <li>Build water collection systems for a reliable water supply</li>
+                <li>Explore the entire island to find rare resources</li>
+                <li>Craft advanced weapons to defend against predators</li>
+                <li>Build a signal fire on high ground to increase your chances of rescue</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section-divider"></div>
+        
+        <!-- Survival mechanics -->
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-purple-400 mb-5 inline-flex items-center">
+            <i data-lucide="zap" class="w-5 h-5 mr-2"></i>
+            Survival Mechanics
+          </h3>
+          <p class="text-gray-300 mb-5 leading-relaxed">
+            Survival Island features comprehensive survival mechanics that require careful management to stay alive:
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gray-800 p-4 rounded-lg enhanced-tip-card survival-card">
+              <h4 class="font-medium text-green-400 flex items-center gap-2 mb-2">
+                <div class="p-1.5 bg-green-900 rounded-full">
+                  <i data-lucide="heart" class="w-4 h-4"></i>
+                </div>
+                Health & Vitals
+              </h4>
+              <p class="text-gray-300 text-sm leading-relaxed">Monitor your health, hunger, thirst, and energy levels to maintain survival</p>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg enhanced-tip-card crafting-card">
+              <h4 class="font-medium text-yellow-400 flex items-center gap-2 mb-2">
+                <div class="p-1.5 bg-yellow-900 rounded-full">
+                  <i data-lucide="hammer" class="w-4 h-4"></i>
+                </div>
+                Crafting System
+              </h4>
+              <p class="text-gray-300 text-sm leading-relaxed">Gather resources to craft tools, weapons, shelter, and other essential items</p>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg enhanced-tip-card explore-card">
+              <h4 class="font-medium text-blue-400 flex items-center gap-2 mb-2">
+                <div class="p-1.5 bg-blue-900 rounded-full">
+                  <i data-lucide="map" class="w-4 h-4"></i>
+                </div>
+                Exploration
+              </h4>
+              <p class="text-gray-300 text-sm leading-relaxed">Discover new areas, find hidden resources, and unveil the island's secrets</p>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg enhanced-tip-card building-card">
+              <h4 class="font-medium text-purple-400 flex items-center gap-2 mb-2">
+                <div class="p-1.5 bg-purple-900 rounded-full">
+                  <i data-lucide="home" class="w-4 h-4"></i>
+                </div>
+                Building
+              </h4>
+              <p class="text-gray-300 text-sm leading-relaxed">Create shelters, storage, crafting stations, and other structures for survival</p>
+            </div>
+          </div>
+          <p class="text-gray-300 leading-relaxed">
+            Master these mechanics to not only survive but thrive on the island. Your ultimate goal may be to escape or to build a sustainable paradise - the choice is yours!
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 游戏信息模态窗口（保留但默认隐藏） -->
+  <div id="game-info-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden">
+    <div class="bg-gray-800 rounded-lg max-w-4xl w-full mx-4 my-8 overflow-y-auto max-h-[90vh] custom-scrollbar">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-yellow-500">Survival Island - Game Guide</h2>
+          <button id="close-info" class="p-2 rounded-full hover:bg-gray-700">
+            <i data-lucide="x" class="w-6 h-6"></i>
+          </button>
+        </div>
+        
+        <!-- 游戏预览和简介 -->
+        <div class="mb-8">
+          <div>
+            <div class="flex items-center gap-3 mb-4">
+              <span class="bg-yellow-500 text-black text-sm font-bold px-3 py-1 rounded-full">4.8 ★</span>
+              <span class="bg-purple-700 text-white text-sm px-3 py-1 rounded-full">18,520 Plays</span>
+              <span class="bg-blue-600 text-white text-sm px-3 py-1 rounded-full">Featured Game</span>
+            </div>
+            <h3 class="text-xl font-semibold text-purple-400 mb-3">Game Overview</h3>
+            <p class="text-gray-300 mb-3">
+              Survival Island is an immersive survival adventure game where you're stranded on a remote island with nothing but your wits to rely on.
+              Your goal is to explore the island, gather resources, craft tools, build shelter, and ultimately find a way to escape or thrive in this challenging environment.
+            </p>
+            <p class="text-gray-300 mb-4">
+              As you explore the island, you'll discover new areas with valuable resources, face dangerous wildlife, and uncover secrets that might help you survive.
+              Manage your hunger, thirst, and health while building increasingly complex structures and tools to improve your chances of survival.
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <span class="bg-gray-700 text-xs px-2 py-1 rounded">Adventure</span>
+              <span class="bg-gray-700 text-xs px-2 py-1 rounded">Survival</span>
+              <span class="bg-gray-700 text-xs px-2 py-1 rounded">Crafting</span>
+              <span class="bg-gray-700 text-xs px-2 py-1 rounded">Action</span>
+              <span class="bg-gray-700 text-xs px-2 py-1 rounded">Exploration</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 控制方式 -->
+        <div class="mb-8">
+          <h3 class="text-xl font-semibold text-purple-400 mb-3">Controls</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-700 p-4 rounded-lg tip-card">
+              <div class="flex items-center gap-3 mb-2">
+                <i data-lucide="move" class="w-6 h-6 text-blue-400"></i>
+                <h4 class="font-medium text-white">Movement</h4>
+              </div>
+              <ul class="list-disc list-inside text-gray-300 text-sm space-y-1">
+                <li>WASD or Arrow Keys to move in four directions</li>
+                <li>Space to jump across obstacles</li>
+                <li>Shift to sprint (uses stamina)</li>
+              </ul>
+            </div>
+            <div class="bg-gray-700 p-4 rounded-lg tip-card">
+              <div class="flex items-center gap-3 mb-2">
+                <i data-lucide="mouse-pointer" class="w-6 h-6 text-red-400"></i>
+                <h4 class="font-medium text-white">Interaction</h4>
+              </div>
+              <ul class="list-disc list-inside text-gray-300 text-sm space-y-1">
+                <li>Left Click to interact with objects or attack</li>
+                <li>Right Click to use held item or place blocks</li>
+                <li>E to open inventory</li>
+              </ul>
+            </div>
+            <div class="bg-gray-700 p-4 rounded-lg tip-card">
+              <div class="flex items-center gap-3 mb-2">
+                <i data-lucide="hammer" class="w-6 h-6 text-green-400"></i>
+                <h4 class="font-medium text-white">Crafting & Building</h4>
+              </div>
+              <ul class="list-disc list-inside text-gray-300 text-sm space-y-1">
+                <li>Tab to open crafting menu</li>
+                <li>F to gather resources from environment</li>
+                <li>B to enter building mode</li>
+              </ul>
+            </div>
+            <div class="bg-gray-700 p-4 rounded-lg tip-card">
+              <div class="flex items-center gap-3 mb-2">
+                <i data-lucide="pause" class="w-6 h-6 text-yellow-400"></i>
+                <h4 class="font-medium text-white">Game Menu</h4>
+              </div>
+              <ul class="list-disc list-inside text-gray-300 text-sm space-y-1">
+                <li>ESC key to pause the game</li>
+                <li>C to view character stats</li>
+                <li>M to view map (if discovered)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 游戏技巧 -->
+        <div class="mb-8">
+          <h3 class="text-xl font-semibold text-purple-400 mb-3">Tips & Strategies</h3>
+          <div class="bg-gray-700 p-4 rounded-lg mb-4 tip-card">
+            <div class="flex items-center gap-3 mb-2">
+              <i data-lucide="lightbulb" class="w-6 h-6 text-yellow-400"></i>
+              <h4 class="font-medium text-white">Beginner Tips</h4>
+            </div>
+            <ul class="list-disc list-inside text-gray-300 space-y-1">
+              <li>Start by gathering basic materials (wood, stone, leaves)</li>
+              <li>Craft a simple shelter before nightfall</li>
+              <li>Find a source of fresh water as soon as possible</li>
+              <li>Create basic tools to gather resources more efficiently</li>
+              <li>Look for fruit trees for easy food sources</li>
+            </ul>
+          </div>
+          <div class="bg-gray-700 p-4 rounded-lg tip-card">
+            <div class="flex items-center gap-3 mb-2">
+              <i data-lucide="crown" class="w-6 h-6 text-orange-400"></i>
+              <h4 class="font-medium text-white">Advanced Strategies</h4>
+            </div>
+            <ul class="list-disc list-inside text-gray-300 space-y-1">
+              <li>Create a sustainable food source through farming</li>
+              <li>Build water collection systems for a reliable water supply</li>
+              <li>Explore the entire island to find rare resources</li>
+              <li>Craft advanced weapons to defend against predators</li>
+              <li>Build a signal fire on high ground to increase your chances of rescue</li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- 生存机制 -->
+        <div>
+          <h3 class="text-xl font-semibold text-purple-400 mb-3">Survival Mechanics</h3>
+          <p class="text-gray-300 mb-3">
+            Master these key survival elements to thrive on the island:
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+            <div class="bg-gray-700 p-3 rounded-lg tip-card">
+              <h4 class="font-medium text-green-400 flex items-center gap-2">
+                <i data-lucide="heart" class="w-4 h-4"></i>
+                Health & Vitals
+              </h4>
+              <p class="text-gray-300 text-sm">Monitor your health, hunger, thirst, and energy levels</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded-lg tip-card">
+              <h4 class="font-medium text-yellow-400 flex items-center gap-2">
+                <i data-lucide="hammer" class="w-4 h-4"></i>
+                Crafting System
+              </h4>
+              <p class="text-gray-300 text-sm">Create tools, weapons, and other essential items</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded-lg tip-card">
+              <h4 class="font-medium text-blue-400 flex items-center gap-2">
+                <i data-lucide="map" class="w-4 h-4"></i>
+                Exploration
+              </h4>
+              <p class="text-gray-300 text-sm">Discover new areas and resources across the island</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded-lg tip-card">
+              <h4 class="font-medium text-purple-400 flex items-center gap-2">
+                <i data-lucide="home" class="w-4 h-4"></i>
+                Building
+              </h4>
+              <p class="text-gray-300 text-sm">Construct shelters and other essential structures</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded-lg tip-card">
+              <h4 class="font-medium text-red-400 flex items-center gap-2">
+                <i data-lucide="shield" class="w-4 h-4"></i>
+                Defense
+              </h4>
+              <p class="text-gray-300 text-sm">Protect yourself from wildlife and environmental hazards</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded-lg tip-card">
+              <h4 class="font-medium text-orange-400 flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                Day/Night Cycle
+              </h4>
+              <p class="text-gray-300 text-sm">Adapt your activities to the time of day for better survival</p>
+            </div>
+          </div>
+          <p class="text-gray-300">
+            Your ultimate goal can be to escape the island or build a thriving settlement - the choice is yours in this open-ended survival adventure!
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 初始化Lucide图标
+    lucide.createIcons();
+    
+    // 游戏加载动画
+    const loadingOverlay = document.getElementById("loading-overlay");
+    const loadingBar = document.getElementById("loading-bar");
+    const loadingText = document.getElementById("loading-text");
+    const gameFrame = document.getElementById("game-frame");
+    const gameInfoModal = document.getElementById("game-info-modal");
+    
+    let progress = 0;
+    const loadingInterval = setInterval(() => {
+      progress += Math.random() * 15;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(loadingInterval);
+        
+        // 加载完成后显示游戏
+        loadingText.textContent = "Game ready!";
+        setTimeout(() => {
+          loadingOverlay.classList.add("opacity-0");
+          setTimeout(() => {
+            loadingOverlay.style.display = "none";
+          }, 500);
+        }, 500);
+      }
+      
+      loadingBar.style.width = `${progress}%`;
+      
+      // 更新加载文本
+      if (progress < 30) {
+        loadingText.textContent = "Loading game assets...";
+      } else if (progress < 60) {
+        loadingText.textContent = "Preparing island environment...";
+      } else if (progress < 90) {
+        loadingText.textContent = "Almost ready...";
+      }
+    }, 300);
+    
+    // 游戏信息模态窗口功能
+    const infoBtn = document.createElement("button");
+    infoBtn.id = "info-btn";
+    infoBtn.className = "p-2 bg-gray-700 hover:bg-indigo-600 rounded-lg ml-2";
+    infoBtn.title = "Game Info";
+    infoBtn.innerHTML = '<i data-lucide="info" class="w-5 h-5"></i>';
+    document.querySelector(".game-controls").appendChild(infoBtn);
+    lucide.createIcons();
+    
+    infoBtn.addEventListener("click", () => {
+      gameInfoModal.classList.remove("hidden");
+    });
+    
+    document.getElementById("close-info").addEventListener("click", () => {
+      gameInfoModal.classList.add("hidden");
+    });
+    
+    // 点击模态窗口外部关闭
+    gameInfoModal.addEventListener("click", (e) => {
+      if (e.target === gameInfoModal) {
+        gameInfoModal.classList.add("hidden");
+      }
+    });
+    
+    // 全屏功能
+    document.getElementById("fullscreen-btn").addEventListener("click", () => {
+      document.querySelector("iframe").requestFullscreen();
+    });
+    
+    // 添加帮助按钮
+    const helpBtn = document.createElement("button");
+    helpBtn.id = "help-btn";
+    helpBtn.className = "p-2 bg-gray-700 hover:bg-indigo-600 rounded-lg ml-2";
+    helpBtn.title = "Quick Help";
+    helpBtn.innerHTML = '<i data-lucide="help-circle" class="w-5 h-5"></i>';
+    document.querySelector(".game-controls").appendChild(helpBtn);
+    lucide.createIcons();
+    
+    // 帮助功能
+    helpBtn.addEventListener("click", () => {
+      alert("Game Controls:\n\n• Use WASD or arrow keys to move\n• Space to jump\n• Left click to interact/attack\n• E to open inventory\n• Tab for crafting menu\n• ESC to pause game\n\nEnjoy playing Survival Island!");
+    });
+    
+    // 键盘快捷键
+    document.addEventListener("keydown", (e) => {
+      // F键或F11键全屏
+      if (e.key === "f" || e.key === "F" || e.key === "F11") {
+        e.preventDefault();
+        document.querySelector("iframe").requestFullscreen();
+      }
+      
+      // I键打开游戏信息
+      if (e.key === "i" || e.key === "I") {
+        if (gameInfoModal.classList.contains("hidden")) {
+          gameInfoModal.classList.remove("hidden");
+        } else {
+          gameInfoModal.classList.add("hidden");
+        }
+      }
+      
+      // G键显示/隐藏游戏指南
+      if (e.key === "g" || e.key === "G") {
+        if (guideVisible) {
+          // 如果指南当前可见，则隐藏
+          quickGuide.classList.add("hidden");
+          guideVisible = false;
+          // 显示恢复按钮
+          document.getElementById("restore-guide-btn").classList.remove("hidden");
+        } else {
+          // 如果指南当前隐藏，则显示
+          showGuide();
+        }
+      }
+      
+      // H键显示帮助
+      if (e.key === "h" || e.key === "H") {
+        helpBtn.click();
+      }
+    });
+    
+    // 快速指南控制
+    const quickGuide = document.getElementById("quick-guide");
+    let guideVisible = true; // 只跟踪指南是否可见
+    
+    // 显示指南函数
+    function showGuide() {
+      if (!guideVisible) {
+        // 如果指南被隐藏，恢复显示
+        quickGuide.classList.remove("hidden");
+        quickGuide.classList.remove("translate-x-80"); // 确保指南处于展开状态
+        quickGuide.classList.add("translate-x-0");
+        guideVisible = true;
+        // 隐藏恢复按钮
+        document.getElementById("restore-guide-btn").classList.add("hidden");
+        showFloatingTip("Game Guide is now visible");
+      }
+    }
+    
+    // 在游戏加载2秒后自动显示指南
+    setTimeout(() => {
+      // 确保指南始终以展开状态显示
+      quickGuide.classList.remove("translate-x-80");
+      quickGuide.classList.add("translate-x-0");
+    }, 2000);
+    
+    // 关闭指南按钮事件
+    document.getElementById("close-guide").addEventListener("click", () => {
+      quickGuide.classList.add("hidden");
+      guideVisible = false;
+      // 显示恢复按钮
+      document.getElementById("restore-guide-btn").classList.remove("hidden");
+      showFloatingTip("Press G key to redisplay Game Guide");
+    });
+    
+    // 恢复指南按钮事件
+    document.getElementById("restore-guide-btn").addEventListener("click", () => {
+      showGuide();
+      document.getElementById("restore-guide-btn").classList.add("hidden");
+    });
+    
+    // 修改more-guide按钮功能，滚动到下方游戏介绍区域
+    document.getElementById("more-guide").addEventListener("click", () => {
+      // 移除之前的事件监听器
+      const gameGuideSection = document.querySelector(".bg-gray-800.p-6.border-t.border-gray-700");
+      if (gameGuideSection) {
+        gameGuideSection.scrollIntoView({ behavior: 'smooth' });
+        showFloatingTip("Scrolling to Game Details");
+      }
+    });
+    
+    // 显示浮动提示函数
+    function showFloatingTip(message, duration = 2000) {
+      const tip = document.createElement('div');
+      tip.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 opacity-0';
+      tip.textContent = message;
+      document.body.appendChild(tip);
+      
+      // 淡入动画
+      setTimeout(() => {
+        tip.classList.add('opacity-100');
+      }, 10);
+      
+      // 延迟后淡出
+      setTimeout(() => {
+        tip.classList.remove('opacity-100');
+        tip.classList.add('opacity-0');
+        
+        // 淡出后移除元素
+        setTimeout(() => {
+          document.body.removeChild(tip);
+        }, 300);
+      }, duration);
+    }
+  </script>
+</body>
+</html> 
